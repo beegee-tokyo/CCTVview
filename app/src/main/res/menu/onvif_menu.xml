@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:ignore="AlwaysShowAction">
+
+	<!-- Menu ID 0 => Play/Pause -->
+	<item
+		android:id="@+id/action_players"
+		android:icon="@android:drawable/ic_media_play"
+		android:orderInCategory="100"
+		android:title="@string/title_activity_onvif_settings"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 1 => ONVIF commands -->
+	<item
+		android:id="@+id/action_commands"
+		android:icon="@mipmap/ic_onvif"
+		android:orderInCategory="100"
+		android:title="@string/title_activity_onvif_settings"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 2 => settings -->
+	<item
+		android:id="@+id/action_settings"
+		android:icon="@android:drawable/ic_menu_preferences"
+		android:orderInCategory="100"
+		android:title="@string/title_activity_onvif_settings"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 3 => recalibrate PTZ position -->
+	<item
+		android:id="@+id/action_viewctrl"
+		android:icon="@android:drawable/ic_menu_view"
+		android:orderInCategory="100"
+		android:title="@string/title_activity_onvif_settings"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 4 => exit app -->
+	<item
+		android:id="@+id/action_exit"
+		android:icon="@drawable/ic_exit"
+		android:orderInCategory="100"
+		android:title="@string/title_activity_onvif_settings"
+		app:showAsAction="always"/>
+
+</menu>

@@ -1,0 +1,68 @@
+<resources>
+	<string name="app_name">CCTVview</string>
+	<string name="bt_txt_onvifcmds">ONVIF commands</string>
+	<string name="bt_txt_playselect">Select player</string>
+	<string name="bt_txt_devinfo">DevInfo</string>
+	<string name="bt_txt_scopes">Scopes</string>
+	<string name="bt_txt_capabilities">Capabilities</string>
+	<string name="bt_txt_profiles">Profiles</string>
+	<string name="bt_txt_netgateway">Default Gateway</string>
+	<string name="bt_txt_dns">DNS Information</string>
+	<string name="bt_txt_netinterfaces">Network Interfaces</string>
+	<string name="bt_txt_netprotocols">Network Protocols</string>
+	<string name="bt_txt_streamuri">Video stream URL</string>
+	<string name="bt_txt_osds">OSD info</string>
+	<string name="bt_txt_ptzgetnodes">PTZ Get all Nodes</string>
+	<string name="bt_txt_ptzgetnode">PTZ Get Node</string>
+	<string name="bt_txt_ptzgetconfigs">PTZ Get all Config</string>
+	<string name="bt_txt_ptzgetconfig">PTZ Get Config</string>
+	<string name="bt_txt_ptzstop">PTZ stop</string>
+	<string name="bt_txt_ptztest1">PTZ absolute 0,0</string>
+
+	<string name="title_activity_onvif_settings">Settings</string>
+
+	<!-- Strings related to Settings -->
+	<string name="pref_header_general">Camera settings</string>
+
+	<string name="pref_help_description">Camera IP: Hostname or IP address of the camera.\n
+		Username: Username for camera access.\n
+		Password: Password for camera access.\n
+		RTSP path: Path to the RTSP stream.\n
+		RTSP port number: Port for RTSP streaming.\n
+		ONVIF path: Path to the camera web access.\n
+		ONVIF port number: Port for Web/PTZ control.
+	</string>
+
+	<string name="pref_cam_url">Camera IP</string>
+	<string name="pref_default_cam_ip">192.168.0.147</string>
+
+	<string name="pref_cam_username">Username</string>
+	<string name="pref_default_username">admin</string>
+
+	<string name="pref_cam_passwd">Password</string>
+	<string name="pref_default_passwd">123</string>
+
+	<string name="pref_rtsp_path">RTSP path</string>
+	<string name="pref_default_rtsp_path">/onvif1</string>
+
+	<string name="pref_cam_port">RTSP port</string>
+	<string name="pref_default_rtsp_port">554</string>
+
+	<string name="pref_cam_web_path">Web/Onvif path</string>
+	<string name="pref_default_web_path">/onvif/device_service</string>
+
+	<string name="pref_cam_web_port">Web/Onvif port</string>
+	<string name="pref_default_web_port">5000</string>
+
+	<string name="tv_txt_startup">Connecting to camera, please wait!</string>
+
+	<string name="dlg_txt_wait">Searching for cameras, please wait…</string>
+	<string name="discovery_failed">No cameras\'s found, but you can still try to add a camera manually!</string>
+
+	<string name="LOCAL_SSID">MHC</string>
+	<string name="ALT_LOCAL_SSID">MHC2</string>
+	<string name="NO_WIFI">Not on home WiFi, no viewing possible</string>
+	<string name="title_activity_onvif_discovery">OnvifDiscovery</string>
+	<string name="title_activity_onvif_settings2">OnvifSettings</string>
+
+</resources>

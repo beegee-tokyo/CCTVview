@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	app:layout_behavior="@string/appbar_scrolling_view_behavior"
+	tools:context=".OnvifSettings">
+
+	<android.support.design.widget.AppBarLayout
+		android:id="@+id/abl_appbar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay">
+
+		<android.support.v7.widget.Toolbar
+			android:id="@+id/toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+	</android.support.design.widget.AppBarLayout>
+
+	<TextView
+		android:id="@+id/tv_cam_settings_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/abl_appbar"
+		android:text="@string/pref_header_general"
+		android:textSize="18sp"/>
+
+	<TextView
+		android:id="@+id/tv_cam_settings_help"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/tv_cam_settings_title"
+		android:text="@string/pref_help_description"/>
+
+	<TextView
+		android:id="@+id/tv_cam_ip_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_ip"
+		android:layout_alignBottom="@+id/et_cam_ip"
+		android:labelFor="@+id/et_cam_ip"
+		android:text="@string/pref_cam_url"/>
+
+	<EditText
+		android:id="@+id/et_cam_ip"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/tv_cam_settings_help"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="textUri"
+		android:text="@string/pref_cam_url"/>
+
+	<TextView
+		android:id="@+id/tv_cam_rtsppath_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_rtsppath"
+		android:layout_alignBottom="@+id/et_cam_rtsppath"
+		android:labelFor="@+id/et_cam_rtsppath"
+		android:text="@string/pref_rtsp_path"/>
+
+	<EditText
+		android:id="@+id/et_cam_rtsppath"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_ip"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="text"
+		android:text="@string/pref_default_rtsp_path"/>
+
+	<TextView
+		android:id="@+id/tv_cam_rtspport_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_rtspport"
+		android:layout_alignBottom="@+id/et_cam_rtspport"
+		android:labelFor="@+id/et_cam_rtspport"
+		android:text="@string/pref_cam_port"/>
+
+	<EditText
+		android:id="@+id/et_cam_rtspport"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_rtsppath"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="number"
+		android:text="@string/pref_default_rtsp_port"/>
+
+	<TextView
+		android:id="@+id/tv_cam_webpath_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_webpath"
+		android:layout_alignBottom="@+id/et_cam_webpath"
+		android:labelFor="@+id/et_cam_webpath"
+		android:text="@string/pref_cam_web_path"/>
+
+	<EditText
+		android:id="@+id/et_cam_webpath"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_rtspport"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="text"
+		android:text="@string/pref_default_web_path"/>
+
+	<TextView
+		android:id="@+id/tv_cam_webport_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_webport"
+		android:layout_alignBottom="@+id/et_cam_webport"
+		android:labelFor="@+id/et_cam_webport"
+		android:text="@string/pref_cam_web_port"/>
+
+	<EditText
+		android:id="@+id/et_cam_webport"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_webpath"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="number"
+		android:text="@string/pref_default_web_port"/>
+
+	<TextView
+		android:id="@+id/tv_cam_user_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignBottom="@+id/et_cam_user"
+		android:layout_alignTop="@+id/et_cam_user"
+		android:labelFor="@+id/et_cam_user"
+		android:text="@string/pref_cam_username"/>
+
+	<EditText
+		android:id="@+id/et_cam_user"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_webport"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="text"
+		android:text="@string/pref_default_username"/>
+
+	<TextView
+		android:id="@+id/tv_cam_pw_title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignTop="@+id/et_cam_pw"
+		android:layout_alignBottom="@+id/et_cam_pw"
+		android:labelFor="@+id/et_cam_pw"
+		android:text="@string/pref_cam_passwd"/>
+
+	<EditText
+		android:id="@+id/et_cam_pw"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_below="@+id/et_cam_user"
+		android:layout_toEndOf="@+id/tv_cam_webpath_title"
+		android:inputType="text"
+		android:text="@string/pref_default_passwd"/>
+
+</RelativeLayout>

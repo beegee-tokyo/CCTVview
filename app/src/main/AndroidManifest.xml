@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="tk.giesecke.cctvview"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+	<application
+		android:allowBackup="true"
+		android:extractNativeLibs="true"
+		android:fullBackupContent="false"
+		android:icon="@mipmap/ic_launcher"
+		android:label="@string/app_name"
+		android:roundIcon="@mipmap/ic_launcher_round"
+		android:supportsRtl="true"
+		android:theme="@style/AppTheme"
+		tools:targetApi="m"
+		tools:ignore="GoogleAppIndexingWarning">
+		<activity android:name=".CCTVview">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".OnvifDiscovery"
+			android:label="@string/title_activity_onvif_discovery"
+			android:parentActivityName=".OnvifSettings"
+			android:theme="@style/AppTheme.NoActionBar">
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".OnvifSettings"/>
+		</activity>
+		<activity
+			android:name=".OnvifSettings"
+			android:label="@string/title_activity_onvif_settings2"
+			android:theme="@style/AppTheme.NoActionBar">
+		</activity>
+	</application>
+
+</manifest>

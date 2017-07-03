@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	android:id="@+id/cl_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	tools:context=".CCTVview"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<SurfaceView
+		android:id="@+id/sv_rtsp"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_centerInParent="true"
+		android:layout_gravity="center"
+		android:visibility="gone"/>
+
+	<TextView
+		android:id="@+id/tv_startup"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_centerInParent="true"
+		android:gravity="center"
+		android:textAlignment="center"
+		android:textSize="36sp"
+		tools:layout_editor_absoluteX="8dp"
+		tools:layout_editor_absoluteY="8dp"
+		tools:text="@string/tv_txt_startup"/>
+
+	<RelativeLayout
+		android:id="@+id/rl_ui"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		tools:layout_editor_absoluteX="8dp"
+		tools:layout_editor_absoluteY="8dp">
+
+		<ImageButton
+			android:id="@+id/ib_move_up"
+			style="?android:attr/buttonBarButtonStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:contentDescription="@string/app_name"
+			android:onClick="onClick"
+			app:srcCompat="@mipmap/ic_arrow_up_trans"/>
+
+		<ImageButton
+			android:id="@+id/ib_move_left"
+			style="?android:attr/buttonBarButtonStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/ib_move_up"
+			android:layout_toStartOf="@+id/ib_move_up"
+			android:contentDescription="@string/app_name"
+			android:onClick="onClick"
+			app:srcCompat="@mipmap/ic_arrow_left_trans"/>
+
+		<ImageButton
+			android:id="@+id/ib_move_right"
+			style="?android:attr/buttonBarButtonStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/ib_move_up"
+			android:layout_toEndOf="@+id/ib_move_up"
+			android:contentDescription="@string/app_name"
+			android:onClick="onClick"
+			app:srcCompat="@mipmap/ic_arrow_right_trans"/>
+
+		<ImageButton
+			android:id="@+id/ib_move_down"
+			style="?android:attr/buttonBarButtonStyle"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/ib_move_left"
+			android:layout_centerHorizontal="true"
+			android:contentDescription="@string/app_name"
+			android:onClick="onClick"
+			app:srcCompat="@mipmap/ic_arrow_down_trans"/>
+
+	</RelativeLayout>
+
+</RelativeLayout>

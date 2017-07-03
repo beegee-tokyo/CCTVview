@@ -1,0 +1,44 @@
+apply plugin: 'com.android.application'
+
+android {
+	compileSdkVersion 25
+	buildToolsVersion "25.0.2"
+	defaultConfig {
+		applicationId "tk.giesecke.cctvview"
+		minSdkVersion 21
+		//noinspection OldTargetApi
+		targetSdkVersion 25
+		versionCode 1
+		versionName "1.0"
+		testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+	}
+	buildTypes {
+		release {
+			minifyEnabled false
+//			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+	}
+	sourceSets {
+		main {
+			java.srcDirs = ['src/main/java', 'src/main/java/OnvifResponses', 'src/main/java/tk/giesecke/RtspClient']
+		}
+	}
+}
+
+repositories {
+	flatDir {
+		dirs 'libs'
+	}
+}
+
+dependencies {
+	compile fileTree(include: ['.jar', '.so'], dir: 'libs')
+	compile 'com.android.support:appcompat-v7:25.3.1'
+	compile 'com.android.support:design:25.3.1'
+	compile 'com.android.support.constraint:constraint-layout:1.0.2'
+	compile 'com.squareup.okio:okio:1.12.0'
+	compile 'com.squareup.okhttp3:okhttp:3.7.0'
+	compile 'com.android.support:support-v4:25.3.1'
+	compile 'org.eclipse.ecf:org.apache.commons.codec:1.9.0.v20170208-1614'
+	compile(name: 'mina-core-2.0.7', ext: 'jar')
+}
