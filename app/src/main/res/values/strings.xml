@@ -65,4 +65,10 @@
 	<string name="title_activity_onvif_discovery">OnvifDiscovery</string>
 	<string name="title_activity_onvif_settings2">OnvifSettings</string>
 
+	<string name="LIGHTS_BACKYARD">192.168.0.59</string>
+	<string name="SECURITY_URL_FRONT_1">192.168.0.52</string>
+	<string name="SECURITY_URL_BACK_1">192.168.0.53</string>
+
+	<string name="tv_result_txt_none">\?W</string>
+
 </resources>

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +14,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
@@ -23,6 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
@@ -31,9 +34,20 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -87,6 +101,9 @@ import static tk.giesecke.cctvview.Onvif.OnvifMediaStreamUri.streamUriToString;
 public class CCTVview extends AppCompatActivity
 		implements View.OnClickListener {
 
+	/** TCP client port to send commands to MHC devices */
+	private static final int TCP_CLIENT_PORT = 9998;
+
 	/** Debug tag */
 	public static final String DEBUG_LOG_TAG = "CCTV_VIEW";
 
@@ -112,6 +129,8 @@ public class CCTVview extends AppCompatActivity
 	private TextView tvStartup;
 	/** Action menu */
 	private Menu actionMenu;
+	/** Menu item for Play button */
+	private MenuItem streamAction;
 
 	/** PTZ movement button up */
 	private ImageButton ptzUp;
@@ -130,6 +149,14 @@ public class CCTVview extends AppCompatActivity
 
 	/** Flag for selected player */
 	private String selectedPlayer = "";
+
+	/** Produced solar power */
+	private static Float solarPower;
+	/** Consumed electrical power */
+	private static Float consPower;
+
+	/** Handler for display update every minute */
+	private Handler handler;
 
 	@Override
 	protected void onSaveInstanceState(final Bundle outState) {
@@ -279,8 +306,39 @@ public class CCTVview extends AppCompatActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.onvif_menu, menu);
+		MenuInflater myMenuInflater = getMenuInflater();
+		myMenuInflater.inflate(R.menu.onvif_menu, menu);
+
 		actionMenu = menu;
+
+		// MenuItem for start/stop streaming
+		streamAction = menu.findItem(R.id.action_stream);
+
+		// Start update of consumption values every 1 minute
+		handler = new Handler();
+		/* Timer for display update every minute */
+		Timer timer = new Timer();
+
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					public void run() {
+						try {
+							SPMPcommunication updateSolarTask = new SPMPcommunication();
+							updateSolarTask.execute();
+						} catch (Exception e) {
+							// error, do something
+						}
+					}
+				});
+			}
+		};
+
+		timer.schedule(task, 0, 60*1000);  // interval of one minute
+
+		// Get consumption details now to start with an updated display
+		new SPMPcommunication();
 		return true;
 	}
 
@@ -291,16 +349,16 @@ public class CCTVview extends AppCompatActivity
 			case R.id.action_commands:
 				parseOnvifCmdButtons();
 				break;
-			case R.id.action_players:
+			case R.id.action_stream:
 				if (isPlaying) {
 					stopPlaybacks();
 					isPlaying = false;
-					actionMenu.getItem(0).setIcon(getDrawable(android.R.drawable.ic_media_play));
+					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_play));
 					screenLock.release();
 				} else {
 					startRtspClientPlayer();
 					isPlaying = true;
-					actionMenu.getItem(0).setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
 					screenLock = ((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(
 							PowerManager.PARTIAL_WAKE_LOCK, "TAG");
 					screenLock.acquire();
@@ -315,6 +373,10 @@ public class CCTVview extends AppCompatActivity
 				stopPlaybacks();
 				finish();
 				break;
+			case R.id.action_lights:
+				new ESPbyTCPAsync().execute(getString(R.string.LIGHTS_BACKYARD), "b");
+				new ESPbyTCPAsync().execute(getString(R.string.SECURITY_URL_BACK_1), "b");
+				new ESPbyTCPAsync().execute(getString(R.string.SECURITY_URL_FRONT_1), "b");
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -392,7 +454,7 @@ public class CCTVview extends AppCompatActivity
 		 * Called when AsyncTask background process is finished
 		 *
 		 * @param result
-		 * 		St_CommResult with requester ID and result of communication
+		 * 		String result of communication
 		 */
 		protected void onPostExecute(String[] result) {
 			parseOnvifResponses(result);
@@ -613,7 +675,7 @@ public class CCTVview extends AppCompatActivity
 					stopPlaybacks();
 					startRtspClientPlayer();
 					isPlaying = true;
-					actionMenu.getItem(0).setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
 				}
 			}
 		}
@@ -722,6 +784,236 @@ public class CCTVview extends AppCompatActivity
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Communication in Async Task between Android and ESP8266 over TCP
+	 *
+	 * param params[0]
+	 *      ESP IP address
+	 * param params[1]
+	 *      ESP command
+	 */
+	private class ESPbyTCPAsync extends AsyncTask<String, String, Void> {
+
+		@Override
+		protected Void doInBackground(String... params) {
+			String targetAddress = params[0];
+			String targetMessage = params[1];
+
+			if (targetAddress.equalsIgnoreCase("")) { // target address is empty, don't try to connect!
+				return null;
+			}
+			try {
+				InetAddress tcpServer = InetAddress.getByName(targetAddress);
+				Socket tcpSocket = new Socket(tcpServer, TCP_CLIENT_PORT);
+
+				tcpSocket.setSoTimeout(10000);
+				if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Sending " + targetMessage
+						+ " to " + targetAddress);
+				PrintWriter out = new PrintWriter(new BufferedWriter(
+						new OutputStreamWriter(tcpSocket.getOutputStream())), true);
+				out.println(targetMessage);
+				tcpSocket.close();
+			} catch (Exception e) {
+				if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "TCP connection failed: " + e.getMessage()
+						+ " " + targetAddress);
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Communication in Async Task between Android and Arduino Yun
+	 */
+	private class SPMPcommunication extends AsyncTask<String, String, String> {
+
+		/**
+		 * Background process of communication
+		 *
+		 * @param params
+		 * 		params[0] = URL
+		 * 		params[1] = command to be sent to ESP or Arduino
+		 * 		params[2] = result of communication
+		 * 		params[3] = ID of requester
+		 * 			spm = solar panel monitor view
+		 * 			air = aircon control view
+		 * 			sec = security control view
+		 * 	@return <code>String</code>
+		 * 			Requester ID and result of communication
+		 */
+		@Override
+		protected String doInBackground(String... params) {
+
+			String comResult = "";
+
+			/** A HTTP client to access the YUN device */
+			// Set timeout to 5 minutes in case we have a lot of data to load
+			OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(300, TimeUnit.SECONDS)
+					.writeTimeout(10, TimeUnit.SECONDS)
+					.readTimeout(300, TimeUnit.SECONDS)
+					.build();
+
+			/** URL to be called */
+			String urlString = "http://192.168.0.50/data/get"; // URL to call
+
+			if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "callSPM = " + urlString);
+
+			/** Request to ESP device */
+			Request request = new Request.Builder()
+					.url(urlString)
+					.build();
+
+			if (request != null) {
+				try {
+					/** Response from SPM device */
+					Response response = client.newCall(request).execute();
+					if (response != null) {
+						comResult = response.body().string();
+					} else {
+						comResult = "";
+					}
+				} catch (IOException e) {
+					comResult = "";
+				}
+			}
+			return comResult;
+		}
+
+		/**
+		 * Called when AsyncTask background process is finished
+		 *
+		 * @param result
+		 * 		String result of communication
+		 */
+		protected void onPostExecute(String result) {
+			if (!result.equalsIgnoreCase("")) {
+				solarViewUpdate(result);
+			}
+		}
+	}
+
+	/**
+	 * Update UI with values received from spMonitor device (Arduino part)
+	 *
+	 * @param value
+	 *        result sent by spMonitor
+	 */
+	private void solarViewUpdate(final String value) {
+		runOnUiThread(new Runnable() {
+			@SuppressLint("DefaultLocale")
+			@SuppressWarnings({"deprecation", "ConstantConditions"})
+			@Override
+			public void run() {
+				if (value.length() != 0) {
+					// decode JSON
+					if (isJSONValid(value)) {
+						/** JSON object containing the values */
+						JSONObject jsonValues;
+						try {
+							/** JSON object containing result from server */
+							JSONObject jsonResult = new JSONObject(value);
+							if (jsonResult.has("value")) {
+								/** JSON object containing the values */
+								jsonValues = jsonResult.getJSONObject("value");
+							} else {
+								return;
+							}
+
+							try {
+								solarPower = Float.parseFloat(jsonValues.getString("S"));
+							} catch (Exception excError) {
+								solarPower = 0.0f;
+							}
+							try {
+								consPower = Float.parseFloat(jsonValues.getString("C"));
+							} catch (Exception excError) {
+								consPower = 0.0f;
+							}
+
+							/** Double for the result of solar current and consumption used at 1min updates */
+							double resultPower = solarPower + consPower;
+
+							/** String for display */
+							String displayTxt;
+
+							/** Menu item to be changed */
+							MenuItem itemToChange;
+							RelativeLayout itemLayout;
+							TextView itemText;
+							int textColor;
+							int backgroundColor;
+
+							// Update solar production
+							itemToChange = actionMenu.findItem(R.id.show_solar);
+							itemToChange.setActionView(R.layout.my_menu_item);
+							itemLayout = (RelativeLayout) itemToChange.getActionView();
+							itemText = (TextView) itemLayout.findViewById(R.id.tv_title);
+							displayTxt = String.format("%.0f", solarPower) + "W";
+							if (solarPower < 0.1f) {
+								backgroundColor = Color.LTGRAY;
+							} else {
+								backgroundColor = Color.YELLOW;
+							}
+							itemText.setText(displayTxt);
+							itemText.setTextColor(Color.BLACK);
+							itemText.setBackgroundColor(backgroundColor);
+
+							itemToChange = actionMenu.findItem(R.id.show_result);
+							itemToChange.setActionView(R.layout.my_menu_item);
+							itemLayout = (RelativeLayout) itemToChange.getActionView();
+							itemText = (TextView) itemLayout.findViewById(R.id.tv_title);
+							if (consPower > 0.0d) {
+								displayTxt = String.format("%.0f", resultPower) + "W";
+								backgroundColor = Color.RED;
+								textColor = Color.WHITE;
+							} else {
+								displayTxt = String.format("%.0f", resultPower) + "W";
+								backgroundColor = Color.GREEN;
+								textColor = Color.BLACK;
+							}
+							itemText.setText(displayTxt);
+							itemText.setTextColor(textColor);
+							itemText.setBackgroundColor(backgroundColor);
+
+							displayTxt = String.format("%.0f", Math.abs(consPower)) + "W";
+							itemToChange = actionMenu.findItem(R.id.show_cons);
+							itemToChange.setActionView(R.layout.my_menu_item);
+							itemLayout = (RelativeLayout) itemToChange.getActionView();
+							itemText = (TextView) itemLayout.findViewById(R.id.tv_title);
+							itemText.setText(displayTxt);
+							itemText.setTextColor(Color.WHITE);
+							itemText.setBackgroundColor(Color.BLUE);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * Check if JSON object is valid
+	 *
+	 * @param test
+	 * 		String with JSON object or array
+	 * @return boolean
+	 * true if "test" us a JSON object or array
+	 * false if no JSON object or array
+	 */
+	private static boolean isJSONValid(String test) {
+		try {
+			new JSONObject(test);
+		} catch (JSONException ex) {
+			try {
+				new JSONArray(test);
+			} catch (JSONException ex1) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static final View.OnClickListener mOnClickListener = new View.OnClickListener() {

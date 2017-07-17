@@ -4,43 +4,67 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:ignore="AlwaysShowAction">
 
-	<!-- Menu ID 0 => Play/Pause -->
+	<!-- Menu ID 0 => Consumption -->
 	<item
-		android:id="@+id/action_players"
-		android:icon="@android:drawable/ic_media_play"
+		android:id="@+id/show_cons"
+		android:actionLayout="@layout/my_menu_item"
 		android:orderInCategory="100"
+		android:title="@string/tv_result_txt_none"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 1 => Import/Export -->
+	<item
+		android:id="@+id/show_result"
+		android:actionLayout="@layout/my_menu_item"
+		android:orderInCategory="100"
+		android:title="@string/tv_result_txt_none"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 2 => Solar -->
+	<item
+		android:id="@+id/show_solar"
+		android:actionLayout="@layout/my_menu_item"
+		android:orderInCategory="100"
+		android:title="@string/tv_result_txt_none"
+		app:showAsAction="always"/>
+
+	<!-- Menu ID 3 => Play/Pause -->
+	<item
+		android:id="@+id/action_stream"
+		android:icon="@android:drawable/ic_media_play"
+		android:orderInCategory="101"
 		android:title="@string/title_activity_onvif_settings"
 		app:showAsAction="always"/>
 
-	<!-- Menu ID 1 => ONVIF commands -->
+	<!-- Menu ID 4 => ONVIF commands -->
 	<item
 		android:id="@+id/action_commands"
 		android:icon="@mipmap/ic_onvif"
-		android:orderInCategory="100"
+		android:orderInCategory="101"
 		android:title="@string/title_activity_onvif_settings"
 		app:showAsAction="always"/>
 
-	<!-- Menu ID 2 => settings -->
+	<!-- Menu ID 5 => settings -->
 	<item
 		android:id="@+id/action_settings"
 		android:icon="@android:drawable/ic_menu_preferences"
-		android:orderInCategory="100"
+		android:orderInCategory="101"
 		android:title="@string/title_activity_onvif_settings"
 		app:showAsAction="always"/>
 
-	<!-- Menu ID 3 => recalibrate PTZ position -->
+	<!-- Menu ID 6 => switch on lights -->
 	<item
-		android:id="@+id/action_viewctrl"
-		android:icon="@android:drawable/ic_menu_view"
-		android:orderInCategory="100"
+		android:id="@+id/action_lights"
+		android:icon="@drawable/ic_lights"
+		android:orderInCategory="101"
 		android:title="@string/title_activity_onvif_settings"
 		app:showAsAction="always"/>
 
-	<!-- Menu ID 4 => exit app -->
+	<!-- Menu ID 7 => exit app -->
 	<item
 		android:id="@+id/action_exit"
 		android:icon="@drawable/ic_exit"
-		android:orderInCategory="100"
+		android:orderInCategory="101"
 		android:title="@string/title_activity_onvif_settings"
 		app:showAsAction="always"/>
 
