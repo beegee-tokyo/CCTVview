@@ -5,7 +5,7 @@ android {
 	buildToolsVersion "25.0.2"
 	defaultConfig {
 		applicationId "tk.giesecke.cctvview"
-		minSdkVersion 21
+		minSdkVersion 16
 		//noinspection OldTargetApi
 		targetSdkVersion 25
 		versionCode 1
@@ -22,6 +22,8 @@ android {
 		main {
 			java.srcDirs = ['src/main/java', 'src/main/java/OnvifResponses', 'src/main/java/tk/giesecke/RtspClient']
 		}
+	}
+	productFlavors {
 	}
 }
 

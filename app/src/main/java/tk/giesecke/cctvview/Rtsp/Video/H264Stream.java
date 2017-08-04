@@ -65,7 +65,7 @@ public class H264Stream extends VideoStream {
 				//noinspection deprecation
 				inputBuffers = mMeidaCodec.getInputBuffers();
 				isStop = false;
-			} catch (IOException e) {
+			} catch (IOException | IllegalArgumentException e) {
 				if (BuildConfig.DEBUG) Log.d(CCTVview.DEBUG_LOG_TAG, "H264Stream - configMediaDecoder exception: " + e.getMessage());
 				e.printStackTrace();
 			}
@@ -115,7 +115,7 @@ public class H264Stream extends VideoStream {
 							mCount++;
 						}
 					}
-				} catch (InterruptedException e) {
+				} catch (InterruptedException | IllegalStateException e) {
 //					Log.e(tag,"Wait the buffer come..");
 					if (BuildConfig.DEBUG) Log.d(CCTVview.DEBUG_LOG_TAG, "H264Stream - hardwareDecodeThread exception: " + e.getMessage());
 				}

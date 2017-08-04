@@ -20,8 +20,8 @@ public class OnvifMediaProfiles {
 	private String videoEncoderConfigToken = "unknown";
 	private String videoEncoderConfigName = "unknown";
 	private String videoEncoderEndcoding = "unknown";
-	private int videoEncoderWidth = 0;
-	private int videoEncoderHeight = 0;
+	public int videoEncoderWidth = 0;
+	public int videoEncoderHeight = 0;
 	private int videoEncoderQuality = 0;
 	private int videoEncoderFrameRateLimit = 0;
 	private int videoEncoderFrameRateInterval = 0;

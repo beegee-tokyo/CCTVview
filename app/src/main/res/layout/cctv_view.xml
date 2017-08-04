@@ -16,17 +16,17 @@
 		android:layout_gravity="center"
 		android:visibility="gone"/>
 
-	<TextView
-		android:id="@+id/tv_startup"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_centerInParent="true"
-		android:gravity="center"
-		android:textAlignment="center"
-		android:textSize="36sp"
-		tools:layout_editor_absoluteX="8dp"
-		tools:layout_editor_absoluteY="8dp"
-		tools:text="@string/tv_txt_startup"/>
+	<!--<TextView-->
+		<!--android:id="@+id/tv_startup"-->
+		<!--android:layout_width="match_parent"-->
+		<!--android:layout_height="match_parent"-->
+		<!--android:layout_centerInParent="true"-->
+		<!--android:gravity="center"-->
+		<!--android:textAlignment="center"-->
+		<!--android:textSize="36sp"-->
+		<!--tools:layout_editor_absoluteX="8dp"-->
+		<!--tools:layout_editor_absoluteY="8dp"-->
+		<!--tools:text="@string/tv_txt_startup"/>-->
 
 	<RelativeLayout
 		android:id="@+id/rl_ui"

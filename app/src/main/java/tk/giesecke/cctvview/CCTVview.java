@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -118,6 +119,8 @@ public class CCTVview extends AppCompatActivity
 
 	/** Screen width in pixel of this device */
 	private static int screenWidth;
+	/** Screen height in pixel of this device */
+	private static int screenHeight;
 	/** Flag for streaming video */
 	private boolean isPlaying = false;
 
@@ -125,8 +128,8 @@ public class CCTVview extends AppCompatActivity
 	private int initComCnt;
 	/** View of main UI */
 	private RelativeLayout rlUiId;
-	/** View for start up message */
-	private TextView tvStartup;
+//	/** View for start up message */
+//	private TextView tvStartup;
 	/** Action menu */
 	private Menu actionMenu;
 	/** Menu item for Play button */
@@ -177,7 +180,7 @@ public class CCTVview extends AppCompatActivity
 
 		// Get layout views
 		rlUiId = (RelativeLayout) findViewById(R.id.rl_ui);
-		tvStartup = (TextView) findViewById(R.id.tv_startup);
+//		tvStartup = (TextView) findViewById(R.id.tv_startup);
 
 		// Get PTZ control buttons
 		ptzUp = (ImageButton) findViewById(R.id.ib_move_up);
@@ -190,7 +193,7 @@ public class CCTVview extends AppCompatActivity
 
 		// Show the start up message instead of the main UI
 		rlUiId.setVisibility(View.GONE);
-		tvStartup.setVisibility(View.VISIBLE);
+//		tvStartup.setVisibility(View.VISIBLE);
 		togglePTZView(false);
 	}
 
@@ -202,7 +205,7 @@ public class CCTVview extends AppCompatActivity
 		display.getSize(size);
 		screenWidth = size.x;
 		/* Screen Height in pixel of this device */
-		int screenHeight = size.y;
+		screenHeight = size.y;
 		// Get screen orientation
 		/* Screen orientation */
 		boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
@@ -216,11 +219,19 @@ public class CCTVview extends AppCompatActivity
 
 		// Get views
 		if (rlUiId == null) rlUiId = (RelativeLayout) findViewById(R.id.rl_ui);
-		if (tvStartup == null) tvStartup = (TextView) findViewById(R.id.tv_startup);
+//		if (tvStartup == null) tvStartup = (TextView) findViewById(R.id.tv_startup);
 
 		// Check if we are on the local WiFi network
 		if (!isHomeWiFi(this)) {
-			tvStartup.setText(getString(R.string.NO_WIFI));
+//			tvStartup.setText(getString(R.string.NO_WIFI));
+			Snackbar mySnackbar = Snackbar.make(findViewById(android.R.id.content),
+					getString(R.string.NO_WIFI),
+					Snackbar.LENGTH_INDEFINITE);
+			mySnackbar.setAction("OK", mOnClickListener);
+			View snackbarView = mySnackbar.getView();
+			TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+			tv.setMaxLines(300);
+			mySnackbar.show();
 		} else {
 			selectedDevice = new OnvifDevice();
 
@@ -285,20 +296,40 @@ public class CCTVview extends AppCompatActivity
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.ib_move_up:
-				new ONVIFcommunication().execute
-						(OnvifPtzContinuousMove.getContinuousMoveCommand(0, 1, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
+				try {
+					RtspClient.sendRequestSetParameter("ptzCmd:UP");
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Command Up failed: " + e.getMessage());
+				}
+//				new ONVIFcommunication().execute
+//						(OnvifPtzContinuousMove.getContinuousMoveCommand(0, 1, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
 				break;
 			case R.id.ib_move_left:
-				new ONVIFcommunication().execute
-						(OnvifPtzContinuousMove.getContinuousMoveCommand(-1, 0, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
+				try {
+					RtspClient.sendRequestSetParameter("ptzCmd:RIGHT");
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Command Left failed: " + e.getMessage());
+				}
+//				new ONVIFcommunication().execute
+//						(OnvifPtzContinuousMove.getContinuousMoveCommand(-1, 0, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
 				break;
 			case R.id.ib_move_right:
-				new ONVIFcommunication().execute
-						(OnvifPtzContinuousMove.getContinuousMoveCommand(1, 0, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
+				try {
+					RtspClient.sendRequestSetParameter("ptzCmd:LEFT");
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Command Right failed: " + e.getMessage());
+				}
+//				new ONVIFcommunication().execute
+//						(OnvifPtzContinuousMove.getContinuousMoveCommand(1, 0, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
 				break;
 			case R.id.ib_move_down:
-				new ONVIFcommunication().execute
-						(OnvifPtzContinuousMove.getContinuousMoveCommand(0, -1, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
+				try {
+					RtspClient.sendRequestSetParameter("ptzCmd:DWON");
+				} catch (IOException e) {
+					if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Command Down failed: " + e.getMessage());
+				}
+//				new ONVIFcommunication().execute
+//						(OnvifPtzContinuousMove.getContinuousMoveCommand(0, -1, 0, selectedDevice.mediaProfiles[0].ptzNodeToken), "move", "");
 				break;
 		}
 	}
@@ -353,12 +384,22 @@ public class CCTVview extends AppCompatActivity
 				if (isPlaying) {
 					stopPlaybacks();
 					isPlaying = false;
-					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_play));
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						streamAction.setIcon(getDrawable(android.R.drawable.ic_media_play));
+					} else {
+						//noinspection deprecation
+						streamAction.setIcon(getResources().getDrawable(android.R.drawable.ic_media_play));
+					}
 					screenLock.release();
 				} else {
 					startRtspClientPlayer();
 					isPlaying = true;
-					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					} else {
+						//noinspection deprecation
+						streamAction.setIcon(getResources().getDrawable(android.R.drawable.ic_media_pause));
+					}
 					screenLock = ((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(
 							PowerManager.PARTIAL_WAKE_LOCK, "TAG");
 					screenLock.acquire();
@@ -379,86 +420,6 @@ public class CCTVview extends AppCompatActivity
 				new ESPbyTCPAsync().execute(getString(R.string.SECURITY_URL_FRONT_1), "b");
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	/**
-	 * Communication in Async Task between Android and Arduino Yun
-	 */
-	private class ONVIFcommunication extends AsyncTask<String, String, String[]> {
-
-		/**
-		 * Background process of communication
-		 *
-		 * @param params
-		 * 		params[0] = soapRequest as string
-		 * @return <code>String</code>
-		 * SOAP XML response from ONVIF device
-		 */
-		@Override
-		protected String[] doInBackground(String... params) {
-
-			String[] result = new String[4];
-			result[0] = params[0]; // Get Onvif request
-			result[1] = params[1]; // Get type of request (get, set or movement)
-			if (params.length == 3) {
-				result[2] = params[2]; // Display parsed results or not
-			} else {
-				result[2] = "";
-			}
-			result[3] = "ok"; // Result of communication attempt, used by onPostExecute
-
-
-			/* A HTTP client to access the ONVIF device */
-			// Set timeout to 5 minutes in case we have a lot of data to load
-			OkHttpClient client = new OkHttpClient.Builder()
-					.connectTimeout(300, TimeUnit.SECONDS)
-					.writeTimeout(10, TimeUnit.SECONDS)
-					.readTimeout(300, TimeUnit.SECONDS)
-					.build();
-
-			MediaType reqBodyType = MediaType.parse("application/soap+xml; charset=utf-8;");
-
-			RequestBody reqBody = RequestBody.create(reqBodyType,
-					getAuthorizationHeader() + result[0] + getEnvelopeEnd());
-
-			/* Request to ONVIF device */
-			Request request = null;
-			try {
-				request = new Request.Builder()
-						.url(selectedDevice.webURL)
-						.post(reqBody)
-						.build();
-			} catch (IllegalArgumentException e) {
-				result[0] = e.getMessage();
-			}
-
-			if (request != null) {
-				try {
-					/* Response from ONVIF device */
-					Response response = client.newCall(request).execute();
-					if (response.code() != 200) {
-						result[0] = response.code() + " - " + response.message();
-						result[3] = "failed";
-					} else {
-						result[0] = response.body().string();
-					}
-				} catch (IOException e) {
-					result[0] = e.getMessage();
-					result[3] = "failed";
-				}
-			}
-			return result;
-		}
-
-		/**
-		 * Called when AsyncTask background process is finished
-		 *
-		 * @param result
-		 * 		String result of communication
-		 */
-		protected void onPostExecute(String[] result) {
-			parseOnvifResponses(result);
-		}
 	}
 
 	private void parseOnvifCmdButtons() {
@@ -552,105 +513,188 @@ public class CCTVview extends AppCompatActivity
 		onvifCmdsDialog.show();
 	}
 
+	/**
+	 * Communication in Async Task between Android and Arduino Yun
+	 */
+	private class ONVIFcommunication extends AsyncTask<String, String, String[]> {
+
+		/**
+		 * Background process of communication
+		 *
+		 * @param params
+		 * 		params[0] = soapRequest as string
+		 * 	    params[1] = type of request (get, set or movement)
+		 * 	    params[2] = flag for initialization requests
+		 * @return <code>String</code>
+		 * SOAP XML response from ONVIF device
+		 */
+		@Override
+		protected String[] doInBackground(String... params) {
+
+			String[] result = new String[5];
+			result[0] = params[0]; // Get Onvif request
+			result[1] = params[1]; // Get type of request (get, set or movement)
+			if (params.length == 3) {
+				result[2] = params[2]; // Display parsed results or not
+			} else {
+				result[2] = "";
+			}
+			result[3] = "ok"; // Result of communication attempt, used by onPostExecute
+			result[4] = ""; // Error message in case communication failed
+
+
+			/* A HTTP client to access the ONVIF device */
+			// Set timeout to 5 minutes in case we have a lot of data to load
+			OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(300, TimeUnit.SECONDS)
+					.writeTimeout(10, TimeUnit.SECONDS)
+					.readTimeout(300, TimeUnit.SECONDS)
+					.build();
+
+			MediaType reqBodyType = MediaType.parse("application/soap+xml; charset=utf-8;");
+
+			RequestBody reqBody = RequestBody.create(reqBodyType,
+					getAuthorizationHeader() + result[0] + getEnvelopeEnd());
+
+			/* Request to ONVIF device */
+			Request request = null;
+			try {
+				request = new Request.Builder()
+						.url(selectedDevice.webURL)
+						.post(reqBody)
+						.build();
+			} catch (IllegalArgumentException e) {
+				result[4] = e.getMessage();
+			}
+
+			if (request != null) {
+				try {
+					/* Response from ONVIF device */
+					Response response = client.newCall(request).execute();
+					if (response.code() != 200) {
+						result[4] = response.code() + " - " + response.message();
+						result[3] = "failed";
+					} else {
+						result[4] = response.body().string();
+					}
+				} catch (IOException e) {
+					result[4] = e.getMessage();
+					result[3] = "failed";
+				}
+			}
+			return result;
+		}
+
+		/**
+		 * Called when AsyncTask background process is finished
+		 *
+		 * @param result
+		 * 		String result of communication
+		 */
+		protected void onPostExecute(String[] result) {
+			parseOnvifResponses(result);
+		}
+	}
+
 	private void parseOnvifResponses(String[] result) {
 		String parsedResult = "Parsing failed";
 		if (result[3].equalsIgnoreCase("failed")) {
-			parsedResult = "Communication error:\n\n" + result[0];
-			tvStartup.setText(parsedResult);
+			parsedResult = "Communication error trying to get " + result[0] + ":\n\n" + result[4];
+//			tvStartup.setText(parsedResult);
 		} else {
 			if (result[1].equalsIgnoreCase("devinfo")) {
-				if (parseDeviceInformationResponse(result[0], selectedDevice.devInfo)) {
+				if (parseDeviceInformationResponse(result[4], selectedDevice.devInfo)) {
 					parsedResult = deviceInformationToString(selectedDevice.devInfo);
 				}
 			} else if (result[1].equalsIgnoreCase("scopes")) {
-				if (parseScopesResponse(result[0], selectedDevice.scopes)) {
+				if (parseScopesResponse(result[4], selectedDevice.scopes)) {
 					parsedResult = scopesToString(selectedDevice.scopes);
 				}
 			} else if (result[1].equalsIgnoreCase("capabilities")) {
-				if (parseCapabilitiesResponse(result[0], selectedDevice.devCapabilities)) {
+				if (parseCapabilitiesResponse(result[4], selectedDevice.devCapabilities)) {
 					parsedResult = capabilitiesToString(selectedDevice.devCapabilities);
 				}
 			} else if (result[1].equalsIgnoreCase("profiles")) {
-				String part1Profile = result[0].substring(result[0].indexOf("<trt:Profiles token"),
-						result[0].indexOf("</trt:Profiles>") + 15);
+				String part1Profile = result[4].substring(result[4].indexOf("<trt:Profiles token"),
+						result[4].indexOf("</trt:Profiles>") + 15);
 				if (parseProfilesResponse(part1Profile, selectedDevice.mediaProfiles[0])) {
 					parsedResult = profilesToString(selectedDevice.mediaProfiles[0]);
 				}
-				part1Profile = result[0].substring(result[0].lastIndexOf("<trt:Profiles token"),
-						result[0].lastIndexOf("</trt:Profiles>") + 15);
+				part1Profile = result[4].substring(result[4].lastIndexOf("<trt:Profiles token"),
+						result[4].lastIndexOf("</trt:Profiles>") + 15);
 				if (parseProfilesResponse(part1Profile, selectedDevice.mediaProfiles[1])) {
 					parsedResult += profilesToString(selectedDevice.mediaProfiles[1]);
 				}
 			} else if (result[1].equalsIgnoreCase("netgate")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parseNetworkDefaultGatewayResponse(result[0], selectedDevice.devDefaultGateway)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parseNetworkDefaultGatewayResponse(result[4], selectedDevice.devDefaultGateway)) {
 //					parsedResult = defaultGatewayToString(selectedDevice.devDefaultGateway);
 //				}
 			} else if (result[1].equalsIgnoreCase("dns")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parseDNSResponse(result[0], selectedDevice.devDNS)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parseDNSResponse(result[4], selectedDevice.devDNS)) {
 //					parsedResult = dnsToString(selectedDevice.devDNS);
 //				}
 			} else if (result[1].equalsIgnoreCase("ifaces")) {
-				if (parseNetworkInterfacesResponse(result[0], selectedDevice.devNetInterface)) {
+				if (parseNetworkInterfacesResponse(result[4], selectedDevice.devNetInterface)) {
 					parsedResult = interfacesToString(selectedDevice.devNetInterface);
 				}
 			} else if (result[1].equalsIgnoreCase("netproto")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parseNetworkProtocolResponse(result[0], selectedDevice.devNetProtocols)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parseNetworkProtocolResponse(result[4], selectedDevice.devNetProtocols)) {
 //					parsedResult = netProtocolToString(selectedDevice.devNetProtocols);
 //				}
 			} else if (result[1].equalsIgnoreCase("streamuri")) {
-				if (parseStreamUriResponse(result[0], selectedDevice.mediaStreamUri)) {
+				if (parseStreamUriResponse(result[4], selectedDevice.mediaStreamUri)) {
 					parsedResult = streamUriToString(selectedDevice.mediaStreamUri);
 				}
 			} else if (result[1].equalsIgnoreCase("osds")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parseOSDSResponse(result[0], selectedDevice.mediaOSDs)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parseOSDSResponse(result[4], selectedDevice.mediaOSDs)) {
 //					parsedResult = osdsToString(selectedDevice.mediaOSDs);
 //				}
 			} else if (result[1].equalsIgnoreCase("getNode")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parsePtzNodeResponse(result[0], selectedDevice.ptzNode)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parsePtzNodeResponse(result[4], selectedDevice.ptzNode)) {
 //					parsedResult = ptzNodeToString(selectedDevice.ptzNode);
 //				}
 			} else if (result[1].equalsIgnoreCase("getNodes")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parsePtzNodesResponse(result[0], selectedDevice.ptzNodes)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parsePtzNodesResponse(result[4], selectedDevice.ptzNodes)) {
 //					parsedResult = ptzNodesToString(selectedDevice.ptzNodes);
 //				}
 			} else if (result[1].equalsIgnoreCase("getConfigs")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parsePtzConfigurationsResponse(result[0], selectedDevice.ptzConfigs)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parsePtzConfigurationsResponse(result[4], selectedDevice.ptzConfigs)) {
 //					parsedResult = ptzConfigsToString(selectedDevice.ptzConfigs);
 //				}
 			} else if (result[1].equalsIgnoreCase("getConfig")) {
 				parsedResult = simpleSoapFormatter(
-						result[0].substring(
-								result[0].indexOf("<SOAP-ENV:Body>")+15,
-								result[0].indexOf("</SOAP-ENV:Body>")));
-//				if (parsePtzConfigurationResponse(result[0], selectedDevice.ptzConfig)) {
+						result[4].substring(
+								result[4].indexOf("<SOAP-ENV:Body>")+15,
+								result[4].indexOf("</SOAP-ENV:Body>")));
+//				if (parsePtzConfigurationResponse(result[4], selectedDevice.ptzConfig)) {
 //					parsedResult = ptzConfigToString(selectedDevice.ptzConfig);
 //				}
 			} else if (result[1].equalsIgnoreCase("move")) {
@@ -668,19 +712,26 @@ public class CCTVview extends AppCompatActivity
 			if (result[2].equalsIgnoreCase("init")) {
 				parsedResult = "";
 				initComCnt += 1;
-				if (initComCnt == 3) {
+				if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Initialization success for " + result[0]);
+				if (initComCnt == 2) {
+					if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Initialization success for 2 commands, start streaming");
 					rlUiId.setVisibility(View.VISIBLE);
-					tvStartup.setVisibility(View.GONE);
+//					tvStartup.setVisibility(View.GONE);
 
 					stopPlaybacks();
 					startRtspClientPlayer();
 					isPlaying = true;
-					streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						streamAction.setIcon(getDrawable(android.R.drawable.ic_media_pause));
+					} else {
+						//noinspection deprecation
+						streamAction.setIcon(getResources().getDrawable(android.R.drawable.ic_media_pause));
+					}
 				}
 			}
 		}
 
-		if (!parsedResult.isEmpty()) {
+		if (!parsedResult.isEmpty() && !result[2].equalsIgnoreCase("init")) {
 			Snackbar mySnackbar = Snackbar.make(findViewById(android.R.id.content),
 					parsedResult,
 					Snackbar.LENGTH_INDEFINITE);
@@ -715,16 +766,14 @@ public class CCTVview extends AppCompatActivity
 		// Try to set the surface view size matching for orientation
 		/* View height to match screen resolution */
 		int viewHeight =
-				(screenWidth * selectedDevice.mediaProfiles[0].videoSourceHeight)
-						/ selectedDevice.mediaProfiles[0].videoSourceWidth;
+				(screenWidth * selectedDevice.mediaProfiles[0].videoEncoderHeight)
+						/ selectedDevice.mediaProfiles[0].videoEncoderWidth;
 		RelativeLayout.LayoutParams clParams =
 				new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.MATCH_PARENT,
 						viewHeight);
 		clParams.addRule(RelativeLayout.CENTER_IN_PARENT);
 		svRtsp.setLayoutParams(clParams);
-
-		if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "VideoWidth: " + svRtsp.getWidth() + " VideoHeight: " + svRtsp.getHeight());
 
 		viewClient = new RtspClient(selectedDevice.rtspURL);
 		viewClient.setSurfaceView(svRtsp);
@@ -739,6 +788,11 @@ public class CCTVview extends AppCompatActivity
 
 		viewClient.start();
 		togglePTZView(true);
+		if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "VideoWidth: " + selectedDevice.mediaProfiles[0].videoEncoderWidth
+				+ " VideoHeight: " + selectedDevice.mediaProfiles[0].videoEncoderHeight);
+		if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "VideoWidth: " + svRtsp.getWidth() + " VideoHeight: " + svRtsp.getHeight());
+		if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "ScreenWidth: " + screenWidth + " ScreenHeight: " + screenHeight);
+
 	}
 
 	private void togglePTZView(boolean showPTZ) {
@@ -965,11 +1019,11 @@ public class CCTVview extends AppCompatActivity
 							itemLayout = (RelativeLayout) itemToChange.getActionView();
 							itemText = (TextView) itemLayout.findViewById(R.id.tv_title);
 							if (consPower > 0.0d) {
-								displayTxt = String.format("%.0f", resultPower) + "W";
+								displayTxt = String.format("%.0f", Math.abs(consPower)) + "W";
 								backgroundColor = Color.RED;
 								textColor = Color.WHITE;
 							} else {
-								displayTxt = String.format("%.0f", resultPower) + "W";
+								displayTxt = String.format("%.0f", Math.abs(consPower)) + "W";
 								backgroundColor = Color.GREEN;
 								textColor = Color.BLACK;
 							}
@@ -977,7 +1031,7 @@ public class CCTVview extends AppCompatActivity
 							itemText.setTextColor(textColor);
 							itemText.setBackgroundColor(backgroundColor);
 
-							displayTxt = String.format("%.0f", Math.abs(consPower)) + "W";
+							displayTxt = String.format("%.0f", Math.abs(resultPower)) + "W";
 							itemToChange = actionMenu.findItem(R.id.show_cons);
 							itemToChange.setActionView(R.layout.my_menu_item);
 							itemLayout = (RelativeLayout) itemToChange.getActionView();

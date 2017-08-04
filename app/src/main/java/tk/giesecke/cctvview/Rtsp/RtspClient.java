@@ -58,10 +58,10 @@ public class RtspClient {
 
 	private Socket mSocket;
 	private BufferedReader mBufferreader;
-	private OutputStream mOutputStream;
-	private Parameters mParams;
+	private static OutputStream mOutputStream;
+	private static Parameters mParams;
 	private Handler mHandler;
-	private int CSeq;
+	private static int CSeq;
 	private int mState;
 	private String mSession;
 	private RtpSocket mRtpSocket;
@@ -346,6 +346,19 @@ public class RtspClient {
 	private void sendRequestGetParameter() throws IOException {
 		String request = "GET_PARAMETER rtsp://" + mParams.address + "/" + sdpInfo.videoTrack + " RTSP/1.0\r\n" + addHeaders();
 		Log.d(tag, request.substring(0, request.indexOf("\r\n")));
+		mOutputStream.write(request.getBytes("UTF-8"));
+	}
+
+	public static void sendRequestSetParameter(String contentType) throws IOException {
+		String request = "SET_PARAMETER rtsp://"
+				+ mParams.address
+//				+ "/"
+//				+ sdpInfo.videoTrack
+				+ " RTSP/1.0\r\n"
+				+ "CSeq: " + (++CSeq) + "\r\n"
+				+ "Content-length: strlen(Content-type)"
+				+ "Content-type: " + contentType + "\r\n";
+		Log.d(tag, request);
 		mOutputStream.write(request.getBytes("UTF-8"));
 	}
 
