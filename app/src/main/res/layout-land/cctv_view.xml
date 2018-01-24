@@ -65,7 +65,8 @@
 			android:layout_alignParentEnd="true"
 			android:contentDescription="@string/app_name"
 			android:onClick="onClick"
-			app:srcCompat="@mipmap/ic_arrow_right_trans"/>
+			app:srcCompat="@mipmap/ic_arrow_right_trans"
+			android:layout_alignParentRight="true"/>
 
 		<ImageButton
 			android:id="@+id/ib_move_down"

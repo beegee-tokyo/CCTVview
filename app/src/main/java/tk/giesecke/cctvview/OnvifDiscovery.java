@@ -244,9 +244,9 @@ public class OnvifDiscovery extends AppCompatActivity {
 							+ " path: " + handledDevice.webPath
 							+ " web port: " + handledDevice.webPort + "\n"
 							+ " stream port: " + handledDevice.rtspPort + "\n"
-					+ scopesToString(handledDevice.scopes)
-					+ capabilitiesToString(handledDevice.devCapabilities)
-					+ profilesToString(handledDevice.mediaProfiles[0]));
+							+ scopesToString(handledDevice.scopes)
+							+ capabilitiesToString(handledDevice.devCapabilities)
+							+ profilesToString(handledDevice.mediaProfiles[0]));
 				}
 			}
 			return hasDevices;
@@ -382,7 +382,7 @@ public class OnvifDiscovery extends AppCompatActivity {
 		for (int i=0; i<onvifDevices.size(); i++) {
 			OnvifDevice handledDevice = onvifDevices.get(i);
 			discResults[i] = "Found:  " + handledDevice.scopes.scopeName +
-			"  at  " + handledDevice.baseUrl + " Ports: " + handledDevice.webPort + " & " + handledDevice.rtspPort;
+					"  at  " + handledDevice.baseUrl + " Ports: " + handledDevice.webPort + " & " + handledDevice.rtspPort;
 		}
 
 		AlertDialog.Builder onvifDiscResultBuilder = new AlertDialog.Builder(this);

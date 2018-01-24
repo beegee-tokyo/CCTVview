@@ -54,7 +54,8 @@
 			android:layout_toStartOf="@+id/ib_move_up"
 			android:contentDescription="@string/app_name"
 			android:onClick="onClick"
-			app:srcCompat="@mipmap/ic_arrow_left_trans"/>
+			app:srcCompat="@mipmap/ic_arrow_left_trans"
+			android:layout_toLeftOf="@+id/ib_move_up"/>
 
 		<ImageButton
 			android:id="@+id/ib_move_right"
@@ -65,7 +66,8 @@
 			android:layout_toEndOf="@+id/ib_move_up"
 			android:contentDescription="@string/app_name"
 			android:onClick="onClick"
-			app:srcCompat="@mipmap/ic_arrow_right_trans"/>
+			app:srcCompat="@mipmap/ic_arrow_right_trans"
+			android:layout_toRightOf="@+id/ib_move_up"/>
 
 		<ImageButton
 			android:id="@+id/ib_move_down"

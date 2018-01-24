@@ -1,8 +1,8 @@
 package tk.giesecke.cctvview.Onvif;
 
-public class OnvifPtzContinuousMove {
+class OnvifPtzContinuousMove {
 
-	@SuppressWarnings("SameParameterValue")
+	@SuppressWarnings({"SameParameterValue", "unused"})
 	public static String getContinuousMoveCommand(int xMove, int yMove, int zoomVal, String profileToken) {
 		String contMoveCmd = "<ContinuousMove xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">";
 		contMoveCmd += "<ProfileToken>" + profileToken + "</ProfileToken>";

@@ -55,7 +55,9 @@
 		android:layout_below="@+id/tv_cam_settings_help"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="textUri"
-		android:text="@string/pref_cam_url"/>
+		android:text="@string/pref_cam_url"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_rtsppath_title"
@@ -74,7 +76,9 @@
 		android:layout_below="@+id/et_cam_ip"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="text"
-		android:text="@string/pref_default_rtsp_path"/>
+		android:text="@string/pref_default_rtsp_path"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_rtspport_title"
@@ -93,7 +97,9 @@
 		android:layout_below="@+id/et_cam_rtsppath"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="number"
-		android:text="@string/pref_default_rtsp_port"/>
+		android:text="@string/pref_default_rtsp_port"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_webpath_title"
@@ -112,7 +118,9 @@
 		android:layout_below="@+id/et_cam_rtspport"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="text"
-		android:text="@string/pref_default_web_path"/>
+		android:text="@string/pref_default_web_path"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_webport_title"
@@ -131,7 +139,9 @@
 		android:layout_below="@+id/et_cam_webpath"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="number"
-		android:text="@string/pref_default_web_port"/>
+		android:text="@string/pref_default_web_port"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_user_title"
@@ -150,7 +160,9 @@
 		android:layout_below="@+id/et_cam_webport"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="text"
-		android:text="@string/pref_default_username"/>
+		android:text="@string/pref_default_username"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 	<TextView
 		android:id="@+id/tv_cam_pw_title"
@@ -169,6 +181,8 @@
 		android:layout_below="@+id/et_cam_user"
 		android:layout_toEndOf="@+id/tv_cam_webpath_title"
 		android:inputType="text"
-		android:text="@string/pref_default_passwd"/>
+		android:text="@string/pref_default_passwd"
+		android:layout_alignParentRight="true"
+		android:layout_toRightOf="@+id/tv_cam_webpath_title"/>
 
 </RelativeLayout>

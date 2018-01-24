@@ -32,8 +32,8 @@ public class RtspClient {
 	private final static int STATE_STARTING = 0x01;
 	private final static int STATE_STOPPING = 0x02;
 	private final static int STATE_STOPPED = 0x03;
-	private final static String METHOD_UDP = "udp";
-	private final static String METHOD_TCP = "tcp";
+	public final static String METHOD_UDP = "udp";
+	public final static String METHOD_TCP = "tcp";
 	// Unused as audio tracks are not implemented
 	// private final static int TRACK_VIDEO = 0x01;
 	// private final static int TRACK_AUDIO = 0x02;
@@ -91,14 +91,17 @@ public class RtspClient {
 	}
 
 
-//	public RtspClient(String address, String name , String password, int port) {
-//		this("udp",address,name,password,port);
-//	}
+	public RtspClient(String address, String name , String password, int port) {
+		this("udp",address,name,password);
+	}
 
 	public RtspClient(String address) {
 		this("udp",address,null,null);
 	}
 
+	public RtspClient(String method, String address) {
+		this(method,address,null,null);
+	}
 
 //	public RtspClient(String method, String address, int port) {
 //		this(method,address,null,null,port);

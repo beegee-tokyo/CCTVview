@@ -17,6 +17,7 @@
 		android:textAlignment="center"
 		android:textColor="@android:color/holo_orange_dark"
 		android:textSize="24sp"
-		android:textStyle="bold"/>
+		android:textStyle="bold"
+		android:layout_alignParentRight="true"/>
 
 </RelativeLayout>

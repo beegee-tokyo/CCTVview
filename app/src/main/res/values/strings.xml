@@ -34,7 +34,7 @@
 	</string>
 
 	<string name="pref_cam_url">Camera IP</string>
-	<string name="pref_default_cam_ip">192.168.0.147</string>
+	<string name="pref_default_cam_ip">192.168.0.55</string>
 
 	<string name="pref_cam_username">Username</string>
 	<string name="pref_default_username">admin</string>
@@ -54,14 +54,13 @@
 	<string name="pref_cam_web_port">Web/Onvif port</string>
 	<string name="pref_default_web_port">5000</string>
 
-	<string name="tv_txt_startup">Connecting to camera, please wait!</string>
-
 	<string name="dlg_txt_wait">Searching for cameras, please wait…</string>
 	<string name="discovery_failed">No cameras\'s found, but you can still try to add a camera manually!</string>
 
 	<string name="LOCAL_SSID">MHC</string>
 	<string name="ALT_LOCAL_SSID">MHC2</string>
 	<string name="NO_WIFI">Not on home WiFi, no viewing possible</string>
+	<string name="COMM_FAIL">Could not connect to camera</string>
 	<string name="title_activity_onvif_discovery">OnvifDiscovery</string>
 	<string name="title_activity_onvif_settings2">OnvifSettings</string>
 

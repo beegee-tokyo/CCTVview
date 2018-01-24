@@ -35,6 +35,14 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.github.druk.dnssd.DNSSD;
+import com.github.druk.dnssd.DNSSDBindable;
+import com.github.druk.dnssd.DNSSDException;
+import com.github.druk.dnssd.DNSSDRegistration;
+import com.github.druk.dnssd.DNSSDService;
+import com.github.druk.dnssd.RegisterListener;
+import com.github.druk.dnssd.TXTRecord;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +73,6 @@ import tk.giesecke.cctvview.Onvif.OnvifDeviceScopes;
 import tk.giesecke.cctvview.Onvif.OnvifMediaProfiles;
 import tk.giesecke.cctvview.Onvif.OnvifMediaStreamUri;
 import tk.giesecke.cctvview.Onvif.OnvifPtzAbsoluteMove;
-import tk.giesecke.cctvview.Onvif.OnvifPtzContinuousMove;
 import tk.giesecke.cctvview.Onvif.OnvifPtzConfiguration;
 import tk.giesecke.cctvview.Onvif.OnvifPtzConfigurations;
 import tk.giesecke.cctvview.Onvif.OnvifPtzNode;
@@ -73,6 +80,7 @@ import tk.giesecke.cctvview.Onvif.OnvifPtzNodes;
 import tk.giesecke.cctvview.Onvif.OnvifPtzStop;
 import tk.giesecke.cctvview.Rtsp.RtspClient;
 
+import static com.github.druk.dnssd.DNSSD.NO_AUTO_RENAME;
 import static tk.giesecke.cctvview.Onvif.OnvifDeviceCapabilities.capabilitiesToString;
 import static tk.giesecke.cctvview.Onvif.OnvifDeviceCapabilities.getCapabilitiesCommand;
 import static tk.giesecke.cctvview.Onvif.OnvifDeviceCapabilities.parseCapabilitiesResponse;
@@ -98,12 +106,17 @@ import static tk.giesecke.cctvview.Onvif.OnvifMediaProfiles.profilesToString;
 import static tk.giesecke.cctvview.Onvif.OnvifMediaStreamUri.getStreamUriCommand;
 import static tk.giesecke.cctvview.Onvif.OnvifMediaStreamUri.parseStreamUriResponse;
 import static tk.giesecke.cctvview.Onvif.OnvifMediaStreamUri.streamUriToString;
+import static tk.giesecke.cctvview.Rtsp.RtspClient.METHOD_UDP;
 
 public class CCTVview extends AppCompatActivity
 		implements View.OnClickListener {
 
 	/** TCP client port to send commands to MHC devices */
 	private static final int TCP_CLIENT_PORT = 9998;
+	/** SPM URL needed to update UI with current power data */
+	public static String spmIP = "";
+	/** Bonjour service, active as long as this app is active */
+	private DNSSDService registeredService = null;
 
 	/** Debug tag */
 	public static final String DEBUG_LOG_TAG = "CCTV_VIEW";
@@ -178,6 +191,9 @@ public class CCTVview extends AppCompatActivity
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 		StrictMode.setThreadPolicy(policy);
 
+		// Start search for SPM device
+		startService(new Intent(this,findSPMbyMDNS.class));
+
 		// Get layout views
 		rlUiId = (RelativeLayout) findViewById(R.id.rl_ui);
 //		tvStartup = (TextView) findViewById(R.id.tv_startup);
@@ -195,6 +211,38 @@ public class CCTVview extends AppCompatActivity
 		rlUiId.setVisibility(View.GONE);
 //		tvStartup.setVisibility(View.VISIBLE);
 		togglePTZView(false);
+
+		if (registeredService == null) {
+			// Register a service on this device
+			try {
+				DNSSD dnssd = new DNSSDBindable(this);
+
+				String makerName = android.os.Build.MANUFACTURER.substring(0, 1).toUpperCase() + android.os.Build.MANUFACTURER.substring(1);
+				TXTRecord myTxtRecord = new TXTRecord();
+				myTxtRecord.set("type","CCTV display");
+				myTxtRecord.set("id",makerName);
+				myTxtRecord.set("board",android.os.Build.MODEL);
+				myTxtRecord.set("service","MHC");
+				myTxtRecord.set("loc",android.os.Build.MODEL);
+				registeredService = dnssd.register(NO_AUTO_RENAME, 0, "cctv", "_arduino._tcp"
+						, null, null, 8266, myTxtRecord,
+						new RegisterListener() {
+
+							@Override
+							public void serviceRegistered(DNSSDRegistration registration, int flags,
+							                              String serviceName, String regType, String domain) {
+								if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "Register successfully ");
+							}
+
+							@Override
+							public void operationFailed(DNSSDService service, int errorCode) {
+								if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "error " + errorCode);
+							}
+						});
+			} catch (DNSSDException e) {
+				if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "error", e);
+			}
+		}
 	}
 
 	@Override
@@ -277,9 +325,9 @@ public class CCTVview extends AppCompatActivity
 
 				// Get initial camera information
 				initComCnt = 0;
+				new ONVIFcommunication().execute(getProfilesCommand(), "profiles", "init");
 				new ONVIFcommunication().execute(getScopesCommand(), "scopes", "init");
 				new ONVIFcommunication().execute(getCapabilitiesCommand(), "capabilities", "init");
-				new ONVIFcommunication().execute(getProfilesCommand(), "profiles", "init");
 			}
 		}
 
@@ -293,6 +341,14 @@ public class CCTVview extends AppCompatActivity
 	}
 
 	@Override
+	protected void onDestroy() {
+		if (registeredService != null) {
+			registeredService.stop();
+			registeredService = null;
+		}
+		super.onDestroy();
+	}
+ 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
 			case R.id.ib_move_up:
@@ -356,6 +412,10 @@ public class CCTVview extends AppCompatActivity
 				handler.post(new Runnable() {
 					public void run() {
 						try {
+							// Check if the IP of the SPM is known
+							if (spmIP.isEmpty()) {
+								return ; // We do not know the URL yet, cancel the update
+							}
 							SPMPcommunication updateSolarTask = new SPMPcommunication();
 							updateSolarTask.execute();
 						} catch (Exception e) {
@@ -546,9 +606,9 @@ public class CCTVview extends AppCompatActivity
 			/* A HTTP client to access the ONVIF device */
 			// Set timeout to 5 minutes in case we have a lot of data to load
 			OkHttpClient client = new OkHttpClient.Builder()
-					.connectTimeout(300, TimeUnit.SECONDS)
-					.writeTimeout(10, TimeUnit.SECONDS)
-					.readTimeout(300, TimeUnit.SECONDS)
+					.connectTimeout(10000, TimeUnit.SECONDS)
+					.writeTimeout(100, TimeUnit.SECONDS)
+					.readTimeout(10000, TimeUnit.SECONDS)
 					.build();
 
 			MediaType reqBodyType = MediaType.parse("application/soap+xml; charset=utf-8;");
@@ -601,6 +661,13 @@ public class CCTVview extends AppCompatActivity
 		if (result[3].equalsIgnoreCase("failed")) {
 			parsedResult = "Communication error trying to get " + result[0] + ":\n\n" + result[4];
 //			tvStartup.setText(parsedResult);
+			Snackbar mySnackbar = Snackbar.make(findViewById(android.R.id.content),
+					getString(R.string.COMM_FAIL),
+					Snackbar.LENGTH_LONG);
+			View snackbarView = mySnackbar.getView();
+			TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+			tv.setMaxLines(300);
+			mySnackbar.show();
 		} else {
 			if (result[1].equalsIgnoreCase("devinfo")) {
 				if (parseDeviceInformationResponse(result[4], selectedDevice.devInfo)) {
@@ -765,17 +832,20 @@ public class CCTVview extends AppCompatActivity
 
 		// Try to set the surface view size matching for orientation
 		/* View height to match screen resolution */
-		int viewHeight =
-				(screenWidth * selectedDevice.mediaProfiles[0].videoEncoderHeight)
-						/ selectedDevice.mediaProfiles[0].videoEncoderWidth;
-		RelativeLayout.LayoutParams clParams =
-				new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.MATCH_PARENT,
-						viewHeight);
-		clParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-		svRtsp.setLayoutParams(clParams);
+		int viewHeight;
+		if (selectedDevice.mediaProfiles[0].videoEncoderWidth != 0) { // was videoSourceWidth
+			viewHeight =
+					(screenWidth * selectedDevice.mediaProfiles[0].videoEncoderHeight)
+							/ selectedDevice.mediaProfiles[0].videoEncoderWidth;
+			RelativeLayout.LayoutParams clParams =
+					new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.MATCH_PARENT,
+							viewHeight);
+			clParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+			svRtsp.setLayoutParams(clParams);
+		}
 
-		viewClient = new RtspClient(selectedDevice.rtspURL);
+		viewClient = new RtspClient(METHOD_UDP, selectedDevice.rtspURL);
 		viewClient.setSurfaceView(svRtsp);
 
 		viewClient.setOnStreamStarted(new RtspClient.onStreamStartedListener() {
@@ -910,7 +980,7 @@ public class CCTVview extends AppCompatActivity
 					.build();
 
 			/** URL to be called */
-			String urlString = "http://192.168.0.50/data/get"; // URL to call
+			String urlString = "http://" + spmIP + "/data/get"; // URL to call
 
 			if (BuildConfig.DEBUG) Log.d(DEBUG_LOG_TAG, "callSPM = " + urlString);
 
